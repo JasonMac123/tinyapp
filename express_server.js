@@ -20,7 +20,6 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     username : req.cookies.username
   };
-  console.log(req.cookies.username);
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
@@ -54,6 +53,10 @@ app.post("/urls/:id/update", (req, res) => {
 });
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
   res.redirect("/urls");
 });
 app.listen(PORT, () => {
