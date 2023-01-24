@@ -1,16 +1,7 @@
 const express = require("express");
+const { generateRandomString } = require('./helperFunctions');
 const app = express();
 const PORT = 8080; // default port 8080
-
-const generateRandomString = () => {
-  let randomString = "";
-  const characterList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 6; i++) {
-    let randomIndexGenerator = Math.floor(Math.random() * characterList.length);
-    randomString += characterList[randomIndexGenerator];
-  }
-  return randomString;
-};
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -35,7 +26,7 @@ app.get("/urls/:id", (req, res) => {
 });
 app.post("/urls", (req, res) => {
   urlDatabase[generateRandomString()] = req.body.longURL;
-  res.send("Ok");
+  res.redirect("/urls");
 });
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
