@@ -1,5 +1,5 @@
 const express = require("express");
-const { generateRandomString } = require('./helperFunctions');
+const { generateRandomString,checkDuplicateEmail } = require('./helperFunctions');
 const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -77,6 +77,16 @@ app.get("/register", (req, res) => {
 });
 app.post("/register", (req, res) => {
   const newRandomID = generateRandomString();
+  if (req.body.pass === "" || req.body.email === "") {
+    res.status(400);
+    res.send("Email or password cannot be empty");
+    return res.redirect("/register");
+  }
+  if (checkDuplicateEmail(users, req.body.email)) {
+    res.status(400);
+    res.send("Email is already signed up");
+    return res.redirect("/register");
+  }
   users[newRandomID] = {
     id : newRandomID,
     email: req.body.email,
