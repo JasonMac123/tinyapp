@@ -31,7 +31,6 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     user : users[req.cookies.user_id]
   };
-  console.log(templateVars.user);
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
@@ -63,12 +62,12 @@ app.post("/urls/:id/update", (req, res) => {
   urlDatabase[updatedURLID] = req.body.URL;
   res.redirect(`/urls/${updatedURLID}`);
 });
+app.get("/login", (req,res) => {
+  const templateVars = {user : users[req.cookies.user_id]};
+  res.render('urls_login', templateVars);
+});
 app.post("/login", (req, res) => {
   res.cookie("user_id", req.body.username);
-  res.redirect("/urls");
-});
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 app.get("/register", (req, res) => {
