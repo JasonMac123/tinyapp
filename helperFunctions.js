@@ -8,6 +8,15 @@ const generateRandomString = () => {
   return randomString;
 };
 
+const checkDuplicateEmail = (database, newEmail) => {
+  for (const user in database) {
+    if (database[user].email === newEmail)
+      return true;
+  }
+  return false;
+};
+
 module.exports = {
-  generateRandomString: generateRandomString
+  generateRandomString,
+  checkDuplicateEmail
 };
