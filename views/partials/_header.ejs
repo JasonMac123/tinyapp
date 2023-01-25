@@ -21,9 +21,7 @@
           <h5>Logged in as: <%= user.email %></h5>
           <form method="post" action="/logout"><button type="submit" class="btn btn-success">Logout</button></form>
         <%  } else{ %>
-          <form method="post" action="/login">
-            <label for="username">username: </label>
-            <input name="username">
+          <form method="get" action="/login">
             <button type="submit" class="btn btn-success">Login</button>
           </form>
           <form method="get" action="/register">
