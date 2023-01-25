@@ -8,7 +8,7 @@ const generateRandomString = () => {
   return randomString;
 };
 
-const checkDuplicateEmail = (database, newEmail) => {
+const checkEmail = (database, newEmail) => {
   for (const user in database) {
     if (database[user].email === newEmail)
       return true;
@@ -16,7 +16,18 @@ const checkDuplicateEmail = (database, newEmail) => {
   return false;
 };
 
+const checkPassword = (database, newEmail, pass) => {
+  for (const user in database) {
+    if (database[user].email === newEmail) {
+      if (database[user].password === pass) {
+        return user;
+      }
+    }
+  }
+  return false;
+};
 module.exports = {
   generateRandomString,
-  checkDuplicateEmail
+  checkEmail,
+  checkPassword
 };

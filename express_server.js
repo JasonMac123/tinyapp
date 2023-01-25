@@ -1,5 +1,5 @@
 const express = require("express");
-const { generateRandomString,checkDuplicateEmail } = require('./helperFunctions');
+const { generateRandomString, checkEmail ,checkPassword } = require('./helperFunctions');
 const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -67,8 +67,25 @@ app.get("/login", (req,res) => {
   res.render('urls_login', templateVars);
 });
 app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.username);
+  console.log(users);
+  if (!checkEmail(users, req.body.email)) {
+    res.status(403);
+    res.send("user with email cannot be found");
+    return;
+  }
+  const userLogin = checkPassword(users, req.body.email, req.body.pass);
+  console.log(userLogin);
+  if (userLogin === false) {
+    res.status(403);
+    res.send("password does not match");
+    return;
+  }
+  res.cookie("user_id", userLogin);
   res.redirect("/urls");
+});
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/login");
 });
 app.get("/register", (req, res) => {
   const templateVars = {user : users[req.cookies.user_id]};
@@ -81,7 +98,7 @@ app.post("/register", (req, res) => {
     res.send("Email or password cannot be empty");
     return res.redirect("/register");
   }
-  if (checkDuplicateEmail(users, req.body.email)) {
+  if (checkEmail(users, req.body.email)) {
     res.status(400);
     res.send("Email is already signed up");
     return res.redirect("/register");
