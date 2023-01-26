@@ -1,19 +1,23 @@
 const express = require("express");
 const {getEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["hello-world", "thisiscrazy"],
+  maxAge: 24 * 60 * 60 * 1000
+}));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/urls", (req, res) => {
   const templateVars = { //templateVars is importing urls to display in the url homepage for the user
     urls: urlDatabase,
-    allowedUrls: urlsForUser(req.cookies.user_id),
-    user : users[req.cookies.user_id]
+    allowedUrls: urlsForUser(req.session.user),
+    user : users[req.session.user]
   };
   res.render("urls_index", templateVars);
 });
@@ -22,7 +26,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(link);
 });
 app.use((req, res, next) => {
-  const user = req.cookies.user_id;
+  const user = req.session.user;
   if (req.params.id !== undefined && !urlDatabase[req.params.id]) {
     //checks if the id exists in the database, also req.params.id must be defined
     return res.sendStatus(404);
@@ -35,18 +39,18 @@ app.use((req, res, next) => {
   return res.redirect("/login");
 });
 app.get("/urls/new", (req, res) => {
-  const templateVars = {user : users[req.cookies.user_id]};//importing cookie information to the header
+  const templateVars = {user : users[req.session.user]};//importing cookie information to the header
   res.render("urls_new", templateVars);
 });
 app.get("/urls/:id", (req, res) => {
-  if (urlDatabase[req.params.id].userID !== req.cookies.user_id) { //checks if the loggged user has permissions to alter the link
+  if (urlDatabase[req.params.id].userID !== req.session.user) { //checks if the loggged user has permissions to alter the link
     res.status(401).send("you do not own the link");
     return;
   }
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
-    user : users[req.cookies.user_id]
+    user : users[req.session.user]
   };
   res.render("urls_show", templateVars);
 });
@@ -56,19 +60,19 @@ app.get("/u/:id", (req, res) => {
   //takes the link from the database and redirects
 });
 app.post("/urls", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.session.user) {
     return res.sendStatus(401);
   }
-  addURL(req.cookies.user_id, req.body.longURL);
+  addURL(req.session.user, req.body.longURL);
   res.redirect("/urls");
 });
 app.post("/urls/:id/delete", (req, res) => {
   const urlDelete = req.params.id;
-  if (!req.cookies.user_id) {
+  if (!req.session.user) {
     res.status(401).send("you are not logged in");
     return;
   }
-  if (urlDatabase[req.params.id].userID !== req.cookies.user_id) {//checks if the user has permissions
+  if (urlDatabase[req.params.id].userID !== req.session.user) {//checks if the user has permissions
     res.status(401).send("you do not own the link");
     return;
   }
@@ -81,10 +85,10 @@ app.post("/urls/:id/update", (req, res) => {
   res.redirect(`/urls/${updatedURLID}`);
 });
 app.get("/login", (req,res) => {
-  if (req.cookies.user_id) { //redirects the user if they are logged in already
+  if (req.session.user) { //redirects the user if they are logged in already
     return res.redirect('/urls');
   }
-  const templateVars = {user : users[req.cookies.user_id]};//sends user_id cookie information to the header to display user email information
+  const templateVars = {user : users[req.session.user]};//sends user_id cookie information to the header to display user email information
   res.render('urls_login', templateVars);
 });
 app.post("/login", (req, res) => {
@@ -97,31 +101,31 @@ app.post("/login", (req, res) => {
     res.status(403).send("password does not match");
     return;
   }
-  res.cookie("user_id", users[userLogin].id);
+  req.session.user = users[userLogin].id;
   res.redirect("/urls");
 });
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 app.get("/register", (req, res) => {
-  if (req.cookies.user_id) { //redirects the user if they are logged in already
+  if (req.session.user) { //redirects the user if they are logged in already
     return res.redirect('/urls');
   }
-  const templateVars = {user : users[req.cookies.user_id]};
+  const templateVars = {user : users[req.session.user]};
   res.render("urls_register", templateVars);
 });
 app.post("/register", (req, res) => {
   if (req.body.pass === "" || req.body.email === "") {//user must enter in non-empty values for pass and email
     res.status(400).send("Email or password cannot be empty");
-    return res.redirect("/register");
+    return;
   }
   if (getEmail(req.body.email)) {//cannot be duplicate email in the users dataset already
     res.status(400).send("Email is already signed up");
-    return res.redirect("/register");
+    return;
   }
   const newUser = addUser(req.body.email, req.body.pass);
-  res.cookie("user_id", newUser);//assigns a cookie using their id
+  req.session.user = newUser;//assigns a cookie using their id
   res.redirect("/urls");
 });
 app.listen(PORT, () => {
