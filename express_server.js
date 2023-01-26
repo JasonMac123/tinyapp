@@ -1,5 +1,6 @@
 const express = require("express");
 const { generateRandomString, checkEmail ,checkPassword, urlsForUser } = require('./helperFunctions');
+const { urlDatabase, users} = require('./dataset');
 const cookieParser = require('cookie-parser');
 const { resolveInclude } = require("ejs");
 const app = express();
@@ -8,35 +9,14 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    allowedUrls: urlsForUser(req.cookies.user_id, urlDatabase),
+    allowedUrls: urlsForUser(req.cookies.user_id),
     user : users[req.cookies.user_id]
   };
   res.render("urls_index", templateVars);
@@ -124,7 +104,7 @@ app.post("/login", (req, res) => {
     res.send("user with email cannot be found");
     return;
   }
-  const userLogin = checkPassword(users, req.body.email, req.body.pass);
+  const userLogin = checkPassword(req.body.email, req.body.pass);
   if (userLogin === false) {
     res.status(403);
     res.send("password does not match");
@@ -151,7 +131,7 @@ app.post("/register", (req, res) => {
     res.send("Email or password cannot be empty");
     return res.redirect("/register");
   }
-  if (checkEmail(users, req.body.email)) {
+  if (checkEmail(req.body.email)) {
     res.status(400);
     res.send("Email is already signed up");
     return res.redirect("/register");
