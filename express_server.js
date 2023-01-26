@@ -27,10 +27,6 @@ app.get("/u/:id", (req, res) => {
 });
 app.use((req, res, next) => {
   const user = req.session.user;
-  if (req.params.id !== undefined && !urlDatabase[req.params.id]) {
-    //checks if the id exists in the database, also req.params.id must be defined
-    return res.sendStatus(404);
-  }
   const whiteList = ["/login", "/register","/urls"];
   if (user || whiteList.includes(req.url)) {
     //allows user to continue if they are whitelisted or signed in
@@ -43,6 +39,10 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 app.get("/urls/:id", (req, res) => {
+  if (!urlDatabase[req.params.id]) {
+    res.status(404).send("link does not exist");
+    return;
+  }
   if (urlDatabase[req.params.id].userID !== req.session.user) { //checks if the loggged user has permissions to alter the link
     res.status(401).send("you do not own the link");
     return;
