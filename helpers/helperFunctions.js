@@ -1,4 +1,5 @@
 const { urlDatabase, users} = require('../data/dataset');
+const bcrypt = require("bcryptjs");
 
 //generates a 6 digit random alphanumeric string
 const generateRandomString = () => {
@@ -12,26 +13,22 @@ const generateRandomString = () => {
   return randomString;
 };
 //checks if the email string value is within the user database for registered users
-const checkEmail = (newEmail) => {
+const getEmail = (newEmail) => {
   for (const user in users) {
     if (users[user].email === newEmail)
-      return true;
-      //boolean result if there an email within the database
+      return user;
+      // returns the user id if there is an email within the database
   }
   return false;
 };
 
 //checks if the password matches the email given in the database
 const checkPassword = (newEmail, pass) => {
-  for (const user in users) {
-    if (users[user].email === newEmail) { //locates if the email matches
-      if (users[user].password === pass) { //checks if the password matches
-        return user;
-        //returns the user id to be used
-      }
-      break;
-      //breaks out of the loop once the email matches since no duplicate emails
-    }
+  const accountDetails = getEmail(newEmail);
+  if (!accountDetails) return false; // password cannot match if there is no email in database
+  if (bcrypt.compareSync(pass, users[accountDetails].password)) {
+    //checks if the password matches
+    return accountDetails;
   }
   return false;
 };
@@ -53,7 +50,7 @@ const addUser = (userEmail, userPassword) => {
   users[newRandomID] = {
     id: newRandomID,
     email: userEmail,
-    password: userPassword
+    password: bcrypt.hashSync(userPassword, 10)
   };
   return newRandomID;
 };
@@ -68,7 +65,7 @@ const addURL = (user, url) => {
 
 module.exports = {
   generateRandomString,
-  checkEmail,
+  getEmail,
   checkPassword,
   urlsForUser,
   addUser,

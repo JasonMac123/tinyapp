@@ -1,5 +1,5 @@
 const express = require("express");
-const {checkEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
+const {getEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -88,7 +88,7 @@ app.get("/login", (req,res) => {
   res.render('urls_login', templateVars);
 });
 app.post("/login", (req, res) => {
-  if (!checkEmail(req.body.email)) {//checks if the email is in the database
+  if (!getEmail(req.body.email)) {//checks if the email is in the database
     res.status(403).send("user with email cannot be found");
     return;
   }
@@ -97,7 +97,7 @@ app.post("/login", (req, res) => {
     res.status(403).send("password does not match");
     return;
   }
-  res.cookie("user_id", userLogin);
+  res.cookie("user_id", users[userLogin].id);
   res.redirect("/urls");
 });
 app.post("/logout", (req, res) => {
@@ -116,7 +116,7 @@ app.post("/register", (req, res) => {
     res.status(400).send("Email or password cannot be empty");
     return res.redirect("/register");
   }
-  if (checkEmail(req.body.email)) {//cannot be duplicate email in the users dataset already
+  if (getEmail(req.body.email)) {//cannot be duplicate email in the users dataset already
     res.status(400).send("Email is already signed up");
     return res.redirect("/register");
   }
