@@ -1,5 +1,5 @@
 const express = require("express");
-const { generateRandomString, checkEmail ,checkPassword, urlsForUser } = require('./helpers/helperFunctions');
+const {checkEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -9,11 +9,8 @@ app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
 app.get("/urls", (req, res) => {
-  const templateVars = {
+  const templateVars = { //templateVars is importing urls to display in the url homepage for the user
     urls: urlDatabase,
     allowedUrls: urlsForUser(req.cookies.user_id),
     user : users[req.cookies.user_id]
@@ -24,7 +21,7 @@ app.get("/urls/new", (req, res) => {
   if (!req.cookies.user_id) {//checks if the user is logged in
     return res.redirect("/login");
   }
-  const templateVars = {user : users[req.cookies.user_id]};
+  const templateVars = {user : users[req.cookies.user_id]};//importing cookie information to the header
   res.render("urls_new", templateVars);
 });
 app.get("/urls/:id", (req, res) => {
@@ -55,10 +52,7 @@ app.post("/urls", (req, res) => {
   if (!req.cookies.user_id) {//checks if the user is logged in
     return res.status(403).send("cannot shorten urls if you are not logged in");
   }
-  urlDatabase[generateRandomString()] = {
-    longURL: req.body.longURL,
-    userID: req.cookies.user_id
-  };
+  addURL(req.cookies.user_id, req.body.longURL);
   res.redirect("/urls");
 });
 app.post("/urls/:id/delete", (req, res) => {
@@ -87,7 +81,7 @@ app.get("/login", (req,res) => {
   if (req.cookies.user_id) { //redirects the user if they are logged in already
     return res.redirect('/urls');
   }
-  const templateVars = {user : users[req.cookies.user_id]};
+  const templateVars = {user : users[req.cookies.user_id]};//sends user_id cookie information to the header to display user email information
   res.render('urls_login', templateVars);
 });
 app.post("/login", (req, res) => {
@@ -115,7 +109,6 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 app.post("/register", (req, res) => {
-  const newRandomID = generateRandomString(); //generates new ID for the user
   if (req.body.pass === "" || req.body.email === "") {//user must enter in non-empty values for pass and email
     res.status(400).send("Email or password cannot be empty");
     return res.redirect("/register");
@@ -124,12 +117,8 @@ app.post("/register", (req, res) => {
     res.status(400).send("Email is already signed up");
     return res.redirect("/register");
   }
-  users[newRandomID] = {//adds the user to the users database with their credientials
-    id : newRandomID,
-    email: req.body.email,
-    password: req.body.pass
-  };
-  res.cookie("user_id", newRandomID);//assigns a cookie using their id
+  const newUser = addUser(req.body.email, req.body.pass);
+  res.cookie("user_id", newUser);//assigns a cookie using their id
   res.redirect("/urls");
 });
 app.listen(PORT, () => {

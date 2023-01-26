@@ -43,9 +43,29 @@ const urlsForUser = function(id) {
   return urlArray;
 };
 
+const addUser = (userEmail, userPassword) => {
+  const newRandomID = generateRandomString(); //generates a new user ID
+  users[newRandomID] = {
+    id: newRandomID,
+    email: userEmail,
+    password: userPassword
+  };
+  return newRandomID;
+};
+
+const addURL = (user, url) => {
+  const newRandomID = generateRandomString(); //generates a new user ID
+  urlDatabase[newRandomID] = {
+    longURL: url,
+    userID: user
+  };
+};
+
 module.exports = {
   generateRandomString,
   checkEmail,
   checkPassword,
-  urlsForUser
+  urlsForUser,
+  addUser,
+  addURL
 };
