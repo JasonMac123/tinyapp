@@ -22,24 +22,24 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.cookies.user_id) {//checks if the user is logged in
     return res.redirect("/login");
   }
   const templateVars = {user : users[req.cookies.user_id]};
   res.render("urls_new", templateVars);
 });
 app.get("/urls/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) {
+  if (!urlDatabase[req.params.id]) { //checks if the id exists in the dataset
     res.status(404);
     res.send("the url link does not exist");
     return;
   }
-  if (!req.cookies.user_id) {
+  if (!req.cookies.user_id) { //checks if the user is logged in
     res.status(401);
     res.send("you must be logged in to continue");
     return;
   }
-  if (urlDatabase[req.params.id].userID !== req.cookies.user_id) {
+  if (urlDatabase[req.params.id].userID !== req.cookies.user_id) { //checks if the loggged user has permissions to alter the link
     res.status(401);
     res.send("you do not own the link");
     return;
@@ -56,7 +56,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(link);
 });
 app.post("/urls", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.cookies.user_id) {//checks if the user is logged in
     return res.send("cannot shorten urls if you are not logged in");
   }
   urlDatabase[generateRandomString()] = {
@@ -69,17 +69,17 @@ app.post("/urls/:id/delete", (req, res) => {
   const urlDelete = req.params.id;
   delete urlDatabase[urlDelete];
   res.redirect("/urls");
-  if (!urlDatabase[req.params.id]) {
+  if (!urlDatabase[req.params.id]) {//checks if the id exists in the database
     res.status(404);
     res.send("the url link does not exist");
     return;
   }
-  if (!req.cookies.user_id) {
+  if (!req.cookies.user_id) {//checks if the user is logged in
     res.status(401);
     res.send("you must be logged in to continue");
     return;
   }
-  if (urlDatabase[req.params.id].userID !== req.cookies.user_id) {
+  if (urlDatabase[req.params.id].userID !== req.cookies.user_id) {//checks if the user has permissions
     res.status(401);
     res.send("you do not own the link");
     return;
@@ -87,24 +87,23 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 app.post("/urls/:id/update", (req, res) => {
   const updatedURLID = req.params.id;
-  urlDatabase[updatedURLID].longURL = req.body.URL;
+  urlDatabase[updatedURLID].longURL = req.body.URL;//updates the id of the shortened link to the new link
   res.redirect(`/urls/${updatedURLID}`);
 });
 app.get("/login", (req,res) => {
-  if (req.cookies.user_id) {
+  if (req.cookies.user_id) { //redirects the user if they are logged in already
     return res.redirect('/urls');
   }
   const templateVars = {user : users[req.cookies.user_id]};
   res.render('urls_login', templateVars);
 });
 app.post("/login", (req, res) => {
-  console.log(users);
-  if (!checkEmail(users, req.body.email)) {
+  if (!checkEmail(req.body.email)) {//checks if the email is in the database
     res.status(403);
     res.send("user with email cannot be found");
     return;
   }
-  const userLogin = checkPassword(req.body.email, req.body.pass);
+  const userLogin = checkPassword(req.body.email, req.body.pass);//returns the user if the password matches the email else it will return false
   if (userLogin === false) {
     res.status(403);
     res.send("password does not match");
@@ -118,30 +117,30 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 app.get("/register", (req, res) => {
-  if (req.cookies.user_id) {
+  if (req.cookies.user_id) { //redirects the user if they are logged in already
     return res.redirect('/urls');
   }
   const templateVars = {user : users[req.cookies.user_id]};
   res.render("urls_register", templateVars);
 });
 app.post("/register", (req, res) => {
-  const newRandomID = generateRandomString();
-  if (req.body.pass === "" || req.body.email === "") {
+  const newRandomID = generateRandomString(); //generates new ID for the user
+  if (req.body.pass === "" || req.body.email === "") {//user must enter in non-empty values for pass and email
     res.status(400);
     res.send("Email or password cannot be empty");
     return res.redirect("/register");
   }
-  if (checkEmail(req.body.email)) {
+  if (checkEmail(req.body.email)) {//cannot be duplicate email in the users dataset already
     res.status(400);
     res.send("Email is already signed up");
     return res.redirect("/register");
   }
-  users[newRandomID] = {
+  users[newRandomID] = {//adds the user to the users database with their credientials
     id : newRandomID,
     email: req.body.email,
     password: req.body.pass
   };
-  res.cookie("user_id", newRandomID);
+  res.cookie("user_id", newRandomID);//assigns a cookie using their id
   res.redirect("/urls");
 });
 app.listen(PORT, () => {
