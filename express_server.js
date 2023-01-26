@@ -2,6 +2,7 @@ const express = require("express");
 const {checkEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
 const cookieParser = require('cookie-parser');
+const { response } = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -23,25 +24,22 @@ app.get("/u/:id", (req, res) => {
 });
 app.use((req, res, next) => {
   const user = req.cookies.user_id;
+  if (req.params.id !== undefined && !urlDatabase[req.params.id]) {
+    //checks if the id exists in the database, also req.params.id must be defined
+    return res.sendStatus(404);
+  }
   const whiteList = ["/login", "/register","/urls"];
   if (user || whiteList.includes(req.url)) {
     //allows user to continue if they are whitelisted or signed in
     return next();
   }
-  return res.sendStatus(401);
+  return res.redirect("/login");
 });
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies.user_id) {//checks if the user is logged in
-    return res.redirect("/login");
-  }
   const templateVars = {user : users[req.cookies.user_id]};//importing cookie information to the header
   res.render("urls_new", templateVars);
 });
 app.get("/urls/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) { //checks if the id exists in the dataset
-    res.status(404).send("the url link does not exist");
-    return;
-  }
   if (urlDatabase[req.params.id].userID !== req.cookies.user_id) { //checks if the loggged user has permissions to alter the link
     res.status(401).send("you do not own the link");
     return;
@@ -56,26 +54,27 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const link = urlDatabase[req.params.id].longURL;
   res.redirect(link);
+  //takes the link from the database and redirects
 });
 app.post("/urls", (req, res) => {
-  if (!req.cookies.user_id) {//checks if the user is logged in
-    return res.status(403).send("cannot shorten urls if you are not logged in");
+  if (!req.cookies.user_id) {
+    return res.sendStatus(401);
   }
   addURL(req.cookies.user_id, req.body.longURL);
   res.redirect("/urls");
 });
 app.post("/urls/:id/delete", (req, res) => {
   const urlDelete = req.params.id;
-  delete urlDatabase[urlDelete];
-  res.redirect("/urls");
-  if (!urlDatabase[req.params.id]) {//checks if the id exists in the database
-    res.status(404).send("the url link does not exist");
+  if (!req.cookies.user_id) {
+    res.status(401).send("you are not logged in");
     return;
   }
   if (urlDatabase[req.params.id].userID !== req.cookies.user_id) {//checks if the user has permissions
     res.status(401).send("you do not own the link");
     return;
   }
+  delete urlDatabase[urlDelete];
+  return;
 });
 app.post("/urls/:id/update", (req, res) => {
   const updatedURLID = req.params.id;
