@@ -52,6 +52,7 @@ const addUser = (userEmail, userPassword) => {
     email: userEmail,
     password: bcrypt.hashSync(userPassword, 10)
   };
+  //adds new user
   return newRandomID;
 };
 
@@ -61,6 +62,7 @@ const addURL = (user, url) => {
     longURL: url,
     userID: user
   };
+  //adds new link
 };
 
 module.exports = {
