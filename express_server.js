@@ -17,6 +17,19 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
+app.get("/u/:id", (req, res) => {
+  const link = urlDatabase[req.params.id].longURL;
+  res.redirect(link);
+});
+app.use((req, res, next) => {
+  const user = req.cookies.user_id;
+  const whiteList = ["/login", "/register","/urls"];
+  if (user || whiteList.includes(req.url)) {
+    //allows user to continue if they are whitelisted or signed in
+    return next();
+  }
+  return res.sendStatus(401);
+});
 app.get("/urls/new", (req, res) => {
   if (!req.cookies.user_id) {//checks if the user is logged in
     return res.redirect("/login");
@@ -27,10 +40,6 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   if (!urlDatabase[req.params.id]) { //checks if the id exists in the dataset
     res.status(404).send("the url link does not exist");
-    return;
-  }
-  if (!req.cookies.user_id) { //checks if the user is logged in
-    res.status(401).send("you must be logged in to continue");
     return;
   }
   if (urlDatabase[req.params.id].userID !== req.cookies.user_id) { //checks if the loggged user has permissions to alter the link
@@ -61,10 +70,6 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
   if (!urlDatabase[req.params.id]) {//checks if the id exists in the database
     res.status(404).send("the url link does not exist");
-    return;
-  }
-  if (!req.cookies.user_id) {//checks if the user is logged in
-    res.status(401).send("you must be logged in to continue");
     return;
   }
   if (urlDatabase[req.params.id].userID !== req.cookies.user_id) {//checks if the user has permissions
