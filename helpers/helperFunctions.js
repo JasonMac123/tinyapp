@@ -5,7 +5,8 @@ const generateRandomString = () => {
   let randomString = "";
   const characterList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   for (let i = 0; i < 6; i++) {
-    let randomIndexGenerator = Math.floor(Math.random() * characterList.length); // generates an integer from 0-1 and multiples it by how many characters there are and floors the result
+    let randomIndexGenerator = Math.floor(Math.random() * characterList.length);
+    // generates an integer from 0-1 and multiples it by how many characters there are and floors the result
     randomString += characterList[randomIndexGenerator];
   }
   return randomString;
@@ -14,7 +15,8 @@ const generateRandomString = () => {
 const checkEmail = (newEmail) => {
   for (const user in users) {
     if (users[user].email === newEmail)
-      return true; //boolean result if there an email within the database
+      return true;
+      //boolean result if there an email within the database
   }
   return false;
 };
@@ -24,9 +26,11 @@ const checkPassword = (newEmail, pass) => {
   for (const user in users) {
     if (users[user].email === newEmail) { //locates if the email matches
       if (users[user].password === pass) { //checks if the password matches
-        return user; //returns the user id to be used
+        return user;
+        //returns the user id to be used
       }
-      break; //breaks out of the loop as there are no duplicate emails within the database
+      break;
+      //breaks out of the loop once the email matches since no duplicate emails
     }
   }
   return false;
@@ -36,7 +40,8 @@ const urlsForUser = function(id) {
   const urlArray = [];
 
   for (const urlID in urlDatabase) {
-    if ((urlDatabase[urlID].userID) === id) { //checking the userID, if it matches the cookie id
+    if ((urlDatabase[urlID].userID) === id) {
+      //checking the userID, if it matches the cookie id
       urlArray.push(urlID);
     }
   }
