@@ -13,18 +13,18 @@ const generateRandomString = () => {
   return randomString;
 };
 //checks if the email string value is within the user database for registered users
-const getEmail = (newEmail) => {
+const getUserByEmail = (newEmail) => {
   for (const user in users) {
     if (users[user].email === newEmail)
       return user;
       // returns the user id if there is an email within the database
   }
-  return false;
+  return undefined;
 };
 
 //checks if the password matches the email given in the database
 const checkPassword = (newEmail, pass) => {
-  const accountDetails = getEmail(newEmail);
+  const accountDetails = getUserByEmail(newEmail);
   if (!accountDetails) return false; // password cannot match if there is no email in database
   if (bcrypt.compareSync(pass, users[accountDetails].password)) {
     //checks if the password matches
@@ -65,7 +65,7 @@ const addURL = (user, url) => {
 
 module.exports = {
   generateRandomString,
-  getEmail,
+  getUserByEmail,
   checkPassword,
   urlsForUser,
   addUser,

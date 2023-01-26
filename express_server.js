@@ -1,5 +1,5 @@
 const express = require("express");
-const {getEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
+const {getUserByEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
 const cookieSession = require('cookie-session');
 const app = express();
@@ -92,7 +92,7 @@ app.get("/login", (req,res) => {
   res.render('urls_login', templateVars);
 });
 app.post("/login", (req, res) => {
-  if (!getEmail(req.body.email)) {//checks if the email is in the database
+  if (!getUserByEmail(req.body.email)) {//checks if the email is in the database
     res.status(403).send("user with email cannot be found");
     return;
   }
@@ -120,7 +120,7 @@ app.post("/register", (req, res) => {
     res.status(400).send("Email or password cannot be empty");
     return;
   }
-  if (getEmail(req.body.email)) {//cannot be duplicate email in the users dataset already
+  if (getUserByEmail(req.body.email)) {//cannot be duplicate email in the users dataset already
     res.status(400).send("Email is already signed up");
     return;
   }
