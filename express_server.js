@@ -1,6 +1,7 @@
 const express = require("express");
 const {getUserByEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
+const methodOverride = require('method-override');
 const cookieSession = require('cookie-session');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -12,6 +13,7 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000
 }));
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 app.get("/urls", (req, res) => {
   const templateVars = { //templateVars is importing urls to display in the url homepage for the user
@@ -66,7 +68,7 @@ app.post("/urls", (req, res) => {
   addURL(req.session.user, req.body.longURL);
   res.redirect("/urls");
 });
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
   const urlDelete = req.params.id;
   if (!req.session.user) {
     res.status(401).send("you are not logged in");
@@ -77,9 +79,9 @@ app.post("/urls/:id/delete", (req, res) => {
     return;
   }
   delete urlDatabase[urlDelete];
-  return;
+  return res.redirect('/urls');
 });
-app.post("/urls/:id/update", (req, res) => {
+app.put("/urls/:id/update", (req, res) => {
   const updatedURLID = req.params.id;
   urlDatabase[updatedURLID].longURL = req.body.URL;//updates the id of the shortened link to the new link
   res.redirect(`/urls/${updatedURLID}`);
