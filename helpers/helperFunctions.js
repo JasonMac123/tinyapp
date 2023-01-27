@@ -61,9 +61,30 @@ const addURL = (user, url) => {
   urlDatabase[newRandomID] = {
     longURL: url,
     userID: user,
-    timesVisited: 0
+    timesVisited: 0,
+    uniqueVisitors: [],
+    visitorTime: []
   };
   //adds new link
+};
+
+const checkUniqueVisitor = (urlID,visitor) => {
+  if (!(urlDatabase[urlID].uniqueVisitors).includes(visitor)) {
+    (urlDatabase[urlID].uniqueVisitors).push(visitor);
+    //checks if the visitor had clicked on this link before and adds them to the list
+    return;
+  }
+  return;
+};
+
+const addTimeStamp = (urlID, visitor) => {
+  let currentDate = new Date().toJSON().slice(0, 10);
+  const timeStamp = {
+    time: currentDate,
+    visitorID: visitor
+  };
+  urlDatabase[urlID].visitorTime.push(timeStamp);
+  return;
 };
 
 module.exports = {
@@ -72,5 +93,7 @@ module.exports = {
   checkPassword,
   urlsForUser,
   addUser,
-  addURL
+  addURL,
+  checkUniqueVisitor,
+  addTimeStamp
 };

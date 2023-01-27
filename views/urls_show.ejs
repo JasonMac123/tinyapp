@@ -21,6 +21,7 @@
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a> 
         </p>
         <p class="card-text">Times Visited: <%= visited %></p>
+        <p class="card-text">Unique Visitors: <%= uniqueVisitors.length%></p>
       </div>
       <div class="card-footer text-muted">
         <h4>Edit</h4>
@@ -29,6 +30,21 @@
           <input type="text" name="URL" placeholder="http://example.com">
           <button type="submit" class="btn btn-primary">Update</button>
         </form>
+      </div>
+      <div>
+        <p>Visitors</p>
+        <table class="table">
+          <tr>
+            <th scope="col">Time Visited</th>
+            <th scope="col">Visitor ID</th>
+          </tr>
+          <% for (const dateTime of timesVisited) { %>
+            <tr>
+            <td><%= dateTime.time %></td>
+            <td><%= dateTime.visitorID %></td>
+          <% } %>
+            </tr>
+        </table>
       </div>
     </div>
     <!-- Bootstrap JS -->

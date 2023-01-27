@@ -1,5 +1,5 @@
 const express = require("express");
-const {getUserByEmail ,checkPassword, urlsForUser, addUser, addURL } = require('./helpers/helperFunctions');
+const {getUserByEmail ,checkPassword, urlsForUser, addUser, addURL, generateRandomString, checkUniqueVisitor, addTimeStamp } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
 const methodOverride = require('method-override');
 const cookieSession = require('cookie-session');
@@ -24,8 +24,13 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 app.get("/u/:id", (req, res) => {
+  if (!req.session.visitorID) {
+    req.session.visitorID = generateRandomString();
+  }
+  checkUniqueVisitor(req.params.id, req.session.visitorID);
   const link = urlDatabase[req.params.id].longURL;
   urlDatabase[req.params.id].timesVisited++;
+  addTimeStamp(req.params.id, req.session.visitorID);
   res.redirect(link);
 });
 app.use((req, res, next) => {
@@ -54,6 +59,8 @@ app.get("/urls/:id", (req, res) => {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
     visited: urlDatabase[req.params.id].timesVisited,
+    uniqueVisitors: urlDatabase[req.params.id].uniqueVisitors,
+    timesVisited: urlDatabase[req.params.id].visitorTime,
     user : users[req.session.user]
   };
   res.render("urls_show", templateVars);
@@ -104,7 +111,7 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 app.post("/logout", (req, res) => {
-  req.session = null;
+  req.session.user = null;
   res.redirect("/login");
 });
 app.get("/register", (req, res) => {
