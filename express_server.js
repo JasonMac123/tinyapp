@@ -37,7 +37,7 @@ app.get("/u/:id", (req, res) => {
 });
 app.use((req, res, next) => {
   const user = req.session.user;
-  const whiteList = ["/login", "/register","/urls"];
+  const whiteList = ["/login", "/register","/urls?", "/register?", "/login?"];
   if (user || whiteList.includes(req.url)) {
     //allows user to continue if they are whitelisted or signed in
     return next();
