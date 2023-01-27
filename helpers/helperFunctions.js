@@ -60,7 +60,8 @@ const addURL = (user, url) => {
   const newRandomID = generateRandomString(); //generates a new user ID
   urlDatabase[newRandomID] = {
     longURL: url,
-    userID: user
+    userID: user,
+    timesVisited: 0
   };
   //adds new link
 };

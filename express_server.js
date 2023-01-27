@@ -10,7 +10,7 @@ app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
   keys: ["hello-world", "thisiscrazy"],
-  maxAge: 24 * 60 * 60 * 1000
+  maxAge: 365 * 24 * 60 * 60 * 1000
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
@@ -25,6 +25,7 @@ app.get("/urls", (req, res) => {
 });
 app.get("/u/:id", (req, res) => {
   const link = urlDatabase[req.params.id].longURL;
+  urlDatabase[req.params.id].timesVisited++;
   res.redirect(link);
 });
 app.use((req, res, next) => {
@@ -52,14 +53,10 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
+    visited: urlDatabase[req.params.id].timesVisited,
     user : users[req.session.user]
   };
   res.render("urls_show", templateVars);
-});
-app.get("/u/:id", (req, res) => {
-  const link = urlDatabase[req.params.id].longURL;
-  res.redirect(link);
-  //takes the link from the database and redirects
 });
 app.post("/urls", (req, res) => {
   if (!req.session.user) {
