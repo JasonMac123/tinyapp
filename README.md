@@ -18,6 +18,7 @@ https://github.com/JasonSnow123/tinyapp/blob/main/docs/TinyApp_EditingURL.png?ra
 - EJS
 - bcryptjs
 - cookie-session
+- method-override
 
 ## Getting Started
 
