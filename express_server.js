@@ -3,13 +3,15 @@ const {getUserByEmail ,checkPassword, urlsForUser, addUser, addURL, generateRand
 const { urlDatabase, users} = require('./data/dataset');
 const methodOverride = require('method-override');
 const cookieSession = require('cookie-session');
+require('dotenv').config();
 const app = express();
+
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
-  keys: ["hello-world", "thisiscrazy"],
+  keys: [process.env.serverKey, process.env.serverPassword],
   maxAge: 365 * 24 * 60 * 60 * 1000
 }));
 app.use(express.urlencoded({ extended: true }));
