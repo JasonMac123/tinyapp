@@ -11,7 +11,7 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
-  keys: [process.env.serverKey, process.env.serverPassword],
+  keys: ["Hello-wasdforld", "hello-world"],
   maxAge: 365 * 24 * 60 * 60 * 1000
 }));
 app.use(express.urlencoded({ extended: true }));
@@ -42,7 +42,7 @@ app.get("/u/:id", (req, res) => {
 
 app.use((req, res, next) => {
   const user = req.session.user;
-  const whiteList = ["/login", "/register", "/login?"];
+  const whiteList = ["/login", "/register","/urls?", "/register?", "/login?"];
   if (user || whiteList.includes(req.url)) {
     //allows user to continue if they are whitelisted or signed in
     return next();
@@ -166,7 +166,7 @@ app.post("/register", (req, res) => {
   const newUser = addUser(req.body.email, req.body.pass);
   req.session.user = newUser;//assigns a cookie using their id
   res.redirect("/urls");
-
+  
 });
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

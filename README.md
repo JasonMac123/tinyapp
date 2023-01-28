@@ -25,4 +25,5 @@ how many unique visitors, and displays a list of users clicking on the link and 
 - Install all dependencies (using the `npm install` command).
 - Uses the environment variables from the .env file for the keys for the cookies
 - Need to create a .env file and set environment variables to run the server
+- Cookie keys have been set already
 - Run the development web server using the `node express_server.js` command.
