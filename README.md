@@ -7,10 +7,8 @@ how many unique visitors, and displays a list of users clicking on the link and 
 
 ## Final Product
 
-!["Screenshot of URLs page"]
-https://github.com/JasonSnow123/tinyapp/blob/main/docs/TinyApp_URLPage.png?raw=true
-!["Screenshot of editing Url page"]
-https://github.com/JasonSnow123/tinyapp/blob/main/docs/TinyApp_EditingURL.png?raw=true
+!["Screenshot of URLs page"](https://github.com/JasonSnow123/tinyapp/blob/main/docs/TinyApp_URLPage.png?raw=true)
+!["Screenshot of editing Url page"](https://github.com/JasonSnow123/tinyapp/blob/main/docs/TinyApp_EditingURL.png?raw=true)
 
 ## Dependencies
 
