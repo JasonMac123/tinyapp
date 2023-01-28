@@ -115,7 +115,7 @@ app.put("/urls/:id/update", (req, res) => {
 
   const updatedURLID = req.params.id;
   urlDatabase[updatedURLID].longURL = req.body.URL;//updates the id of the shortened link to the new link
-  res.redirect(`/urls/${updatedURLID}`);
+  res.redirect("/urls");
 });
 
 app.get("/login", (req,res) => {
