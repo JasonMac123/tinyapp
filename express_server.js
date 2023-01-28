@@ -17,6 +17,13 @@ app.use(cookieSession({
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+
+app.get("/", (req, res)=> {
+  if (req.session.user) {
+    return res.redirect("/urls");
+  }
+  res.redirect("/login");
+});
 app.get("/urls", (req, res) => {
   const templateVars = { //templateVars is importing urls to display in the url homepage for the user
     urls: urlDatabase,
