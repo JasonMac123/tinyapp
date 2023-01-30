@@ -1,14 +1,14 @@
 const express = require("express");
-const {getUserByEmail ,checkPassword, urlsForUser, addUser, addURL, generateRandomString, checkUniqueVisitor, addTimeStamp } = require('./helpers/helperFunctions');
+const {getUserByEmail ,checkPassword, urlsForUser, addUser, addURL, generateRandomString, checkUniqueVisitor, addTimeStamp, checkValidUrl } = require('./helpers/helperFunctions');
 const { urlDatabase, users} = require('./data/dataset');
 const methodOverride = require('method-override');
 const cookieSession = require('cookie-session');
-require('dotenv').config();
-const app = express();
 
+const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
+
 app.use(cookieSession({
   name: 'session',
   keys: ["Hello-wasdforld", "hello-world"],
@@ -24,17 +24,23 @@ app.get("/", (req, res)=> {
   }
   res.redirect("/login");
 });
+
 app.get("/urls", (req, res) => {
   const templateVars = { //templateVars is importing urls to display in the url homepage for the user
     urls: urlDatabase,
     allowedUrls: urlsForUser(req.session.user),
     user : users[req.session.user]
   };
-
+  //templateVars is importing urls to display in the url homepage for the user
   res.render("urls_index", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
+  if (!checkValidUrl(req.params.id)) {
+    res.send("Non-valid url id");
+    return;
+  }
+
   if (!req.session.visitorID) {
     req.session.visitorID = generateRandomString();
   }
@@ -144,31 +150,37 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 
 });
+
 app.post("/logout", (req, res) => {
   req.session.user = null;
   res.redirect("/login");
 
 });
+
 app.get("/register", (req, res) => {
 
-  if (req.session.user) { //redirects the user if they are logged in already
+  if (req.session.user) {
     return res.redirect('/urls');
   }
+  //redirects the user if they are logged in already
 
   const templateVars = {user : users[req.session.user]};
   res.render("urls_register", templateVars);
 });
+
 app.post("/register", (req, res) => {
 
-  if (req.body.pass === "" || req.body.email === "") {//user must enter in non-empty values for pass and email
+  if (req.body.pass === "" || req.body.email === "") {
     res.status(400).send("Email or password cannot be empty");
     return;
   }
+  //user must enter in non-empty values for pass and email
 
   if (getUserByEmail(req.body.email)) {//cannot be duplicate email in the users dataset already
     res.status(400).send("Email is already signed up");
     return;
   }
+  //cannot be duplicate email in the users dataset already
 
   const newUser = addUser(req.body.email, req.body.pass);
   req.session.user = newUser;//assigns a cookie using their id

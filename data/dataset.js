@@ -3,15 +3,15 @@ const urlDatabase = {
     longURL: "https://www.tsn.ca",
     userID: "aJ48lW",
     timesVisited: 0,
-    visitors: [],
-    visitorTime: []
+    visitorTime: [],
+    uniqueVisitors: []
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
     timesVisited: 0,
-    visitors: [],
-    visitorTime: []
+    visitorTime: [],
+    uniqueVisitors: []
   },
 };
 const users = {

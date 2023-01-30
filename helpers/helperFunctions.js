@@ -71,12 +71,15 @@ const addURL = (user, url) => {
 const checkUniqueVisitor = (urlID,visitor) => {
   if (!(urlDatabase[urlID].uniqueVisitors).includes(visitor)) {
     (urlDatabase[urlID].uniqueVisitors).push(visitor);
-    //checks if the visitor had clicked on this link before and adds them to the list
+    /** checks if the visitor had clicked on this link before and adds them to *   the list if they haven't
+    */
     return;
   }
   return;
 };
-
+/**  takes the current date and pushes the date and visitor ID to the url
+ *   and adds its to the database;
+ */
 const addTimeStamp = (urlID, visitor) => {
   let currentDate = new Date().toJSON().slice(0, 10);
   const timeStamp = {
@@ -85,6 +88,15 @@ const addTimeStamp = (urlID, visitor) => {
   };
   urlDatabase[urlID].visitorTime.push(timeStamp);
   return;
+};
+// checks if the id as a valid shortened link in the database and returns the object
+const checkValidUrl = (id) => {
+  for (const url in urlDatabase) {
+    if (url === id) {
+      return true;
+    }
+  }
+  return false;
 };
 
 module.exports = {
@@ -95,5 +107,6 @@ module.exports = {
   addUser,
   addURL,
   checkUniqueVisitor,
-  addTimeStamp
+  addTimeStamp,
+  checkValidUrl
 };
