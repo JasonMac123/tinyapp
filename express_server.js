@@ -61,7 +61,7 @@ app.get("/u/:id", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   if (!req.session.user) {
-    res.redirect("/urls");
+    res.redirect("/login");
     return;
   }
 
@@ -88,7 +88,11 @@ app.get("/urls/:id", (req, res) => {
     res.status(401).send("you do not own the link");
     return;
   }
-
+  /*  templateVars is displaying information about the url from urlDatabase to url/id
+   *  this is being sent to the ejs template document which renders the information of each paramater
+   *  shown to the creator of the link. Data includes who visisted the link, what time, how many times
+   *  was clicked on and the url information.
+   */
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
