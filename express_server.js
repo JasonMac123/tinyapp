@@ -26,16 +26,19 @@ app.get("/", (req, res)=> {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { //templateVars is importing urls to display in the url homepage for the user
+  const templateVars = {
+    //templateVars is importing urls to display in the url homepage for the user
     urls: urlDatabase,
     allowedUrls: urlsForUser(req.session.user),
     user : users[req.session.user]
   };
+  
   //templateVars is importing urls to display in the url homepage for the user
   res.render("urls_index", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
+  
   if (!checkValidUrl(req.params.id)) {
     res.send("Non-valid url id");
     return;
@@ -54,18 +57,23 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.use((req, res, next) => {
+
   const user = req.session.user;
   const whiteList = ["/login", "/register","/urls?", "/register?", "/login?"];
+
   if (user || whiteList.includes(req.url)) {
     //allows user to continue if they are whitelisted or signed in
     return next();
   }
+
   return res.redirect("/login");
 });
 
 app.get("/urls/new", (req, res) => {
+
   const templateVars = {user : users[req.session.user]};//importing cookie information to the header
   res.render("urls_new", templateVars);
+
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -106,6 +114,7 @@ app.post("/urls", (req, res) => {
 
 app.delete("/urls/:id/delete", (req, res) => {
   const urlDelete = req.params.id;
+
   if (!req.session.user) {
     res.status(401).send("you are not logged in");
     return;
@@ -125,6 +134,7 @@ app.put("/urls/:id/update", (req, res) => {
   const updatedURLID = req.params.id;
   urlDatabase[updatedURLID].longURL = req.body.URL;//updates the id of the shortened link to the new link
   res.redirect("/urls");
+
 });
 
 app.get("/login", (req,res) => {
@@ -135,9 +145,11 @@ app.get("/login", (req,res) => {
 
   const templateVars = {user : users[req.session.user]};//sends user_id cookie information to the header to display user email information
   res.render('urls_login', templateVars);
+
 });
 
 app.post("/login", (req, res) => {
+  
   if (!getUserByEmail(req.body.email)) {//checks if the email is in the database
     res.status(403).send("user with email cannot be found");
     return;
