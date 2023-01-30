@@ -69,7 +69,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 
 });
-
+// moved before app.use to send html errors to user if they occur rather than redirecting to login
 app.get("/urls/:id", (req, res) => {
   /* security purposes to check if
    * the id exists
@@ -158,7 +158,17 @@ app.delete("/urls/:id/delete", (req, res) => {
 });
 
 app.put("/urls/:id/update", (req, res) => {
-
+  /* requires the user to be logged in
+   * security purposes to prevent other users from deleting other people's links
+   */
+  if (!req.session.user) {
+    res.send("You are not logged in");
+    return;
+  }
+  if (urlDatabase[req.params.id].userID !== req.session.user) { //checks if the loggged user has permissions to alter the link
+    res.status(401).send("you do not own the link");
+    return;
+  }
   const updatedURLID = req.params.id;
   urlDatabase[updatedURLID].longURL = req.body.URL;
   //updates the id of the shortened link to the new link
