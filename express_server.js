@@ -58,6 +58,18 @@ app.get("/u/:id", (req, res) => {
   const link = urlDatabase[req.params.id].longURL;
   res.redirect(link);
 });
+
+app.get("/urls/new", (req, res) => {
+  if (!req.session.user) {
+    res.redirect("/urls");
+    return;
+  }
+
+  const templateVars = {user : users[req.session.user]};//importing cookie information to the header
+  res.render("urls_new", templateVars);
+
+});
+
 app.get("/urls/:id", (req, res) => {
   /* security purposes to check if
    * the id exists
@@ -106,13 +118,6 @@ app.use((req, res, next) => {
   }
 
   return res.redirect("/login");
-});
-
-app.get("/urls/new", (req, res) => {
-
-  const templateVars = {user : users[req.session.user]};//importing cookie information to the header
-  res.render("urls_new", templateVars);
-
 });
 
 /* this route creates a new link
