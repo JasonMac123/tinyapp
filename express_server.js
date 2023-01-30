@@ -37,6 +37,16 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/urls/new", (req, res) => {
+  if (!req.session.user) {
+    res.redirect("/login");
+    return;
+  }
+  const templateVars = {user : users[req.session.user]};//importing cookie information to the header
+  res.render("urls_new", templateVars);
+
+});
+
 app.get("/u/:id", (req, res) => {
   
   if (!checkValidUrl(req.params.id)) {
@@ -59,16 +69,44 @@ app.get("/u/:id", (req, res) => {
   res.redirect(link);
 });
 
-app.get("/urls/new", (req, res) => {
+app.put("/urls/:id/update", (req, res) => {
+  /* requires the user to be logged in
+   * security purposes to prevent other users from deleting other people's links
+   */
   if (!req.session.user) {
-    res.redirect("/login");
+    res.send("You are not logged in");
+    return;
+  }
+  if (urlDatabase[req.params.id].userID !== req.session.user) { //checks if the loggged user has permissions to alter the link
+    res.status(401).send("you do not own the link");
+    return;
+  }
+  const updatedURLID = req.params.id;
+  urlDatabase[updatedURLID].longURL = req.body.URL;
+  //updates the id of the shortened link to the new link
+  res.redirect("/urls");
+
+});
+
+app.delete("/urls/:id/delete", (req, res) => {
+  const urlDelete = req.params.id;
+  /* requires the user to be logged in
+   * security purposes to prevent other users from deleting other people's links
+   */
+  if (!req.session.user) {
+    res.status(401).send("you are not logged in");
     return;
   }
 
-  const templateVars = {user : users[req.session.user]};//importing cookie information to the header
-  res.render("urls_new", templateVars);
-
+  if (urlDatabase[req.params.id].userID !== req.session.user) {//checks if the user has permissions
+    res.status(401).send("you do not own the link");
+    return;
+  }
+  
+  delete urlDatabase[urlDelete];
+  return res.redirect('/urls');
 });
+
 // moved before app.use to send html errors to user if they occur rather than redirecting to login
 app.get("/urls/:id", (req, res) => {
   /* security purposes to check if
@@ -136,44 +174,6 @@ app.post("/urls", (req, res) => {
   const newID = addURL(req.session.user, req.body.longURL);
 
   res.redirect(`/urls/${newID}`);
-});
-
-app.delete("/urls/:id/delete", (req, res) => {
-  const urlDelete = req.params.id;
-  /* requires the user to be logged in
-   * security purposes to prevent other users from deleting other people's links
-   */
-  if (!req.session.user) {
-    res.status(401).send("you are not logged in");
-    return;
-  }
-
-  if (urlDatabase[req.params.id].userID !== req.session.user) {//checks if the user has permissions
-    res.status(401).send("you do not own the link");
-    return;
-  }
-  
-  delete urlDatabase[urlDelete];
-  return res.redirect('/urls');
-});
-
-app.put("/urls/:id/update", (req, res) => {
-  /* requires the user to be logged in
-   * security purposes to prevent other users from deleting other people's links
-   */
-  if (!req.session.user) {
-    res.send("You are not logged in");
-    return;
-  }
-  if (urlDatabase[req.params.id].userID !== req.session.user) { //checks if the loggged user has permissions to alter the link
-    res.status(401).send("you do not own the link");
-    return;
-  }
-  const updatedURLID = req.params.id;
-  urlDatabase[updatedURLID].longURL = req.body.URL;
-  //updates the id of the shortened link to the new link
-  res.redirect("/urls");
-
 });
 
 app.get("/login", (req,res) => {
