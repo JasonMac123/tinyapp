@@ -73,7 +73,10 @@ app.get("/urls/:id", (req, res) => {
     res.status(404).send("link does not exist");
     return;
   }
-
+  if (!req.session.user) {
+    res.status(401).send("you are not logged in");
+    return;
+  }
   if (urlDatabase[req.params.id].userID !== req.session.user) { //checks if the loggged user has permissions to alter the link
     res.status(401).send("you do not own the link");
     return;
@@ -96,9 +99,9 @@ app.post("/urls", (req, res) => {
     return res.sendStatus(401);
   }
 
-  addURL(req.session.user, req.body.longURL);
+  const newID = addURL(req.session.user, req.body.longURL);
 
-  res.redirect("/urls");
+  res.redirect(`/urls/${newID}`);
 });
 
 app.delete("/urls/:id/delete", (req, res) => {

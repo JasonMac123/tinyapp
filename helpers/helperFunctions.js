@@ -65,7 +65,10 @@ const addURL = (user, url) => {
     uniqueVisitors: [],
     visitorTime: []
   };
-  //adds new link
+  return newRandomID;
+  /** adds new link
+   *  returns the url Object id
+   */
 };
 
 const checkUniqueVisitor = (urlID,visitor) => {
