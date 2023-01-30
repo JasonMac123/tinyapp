@@ -58,32 +58,12 @@ app.get("/u/:id", (req, res) => {
   const link = urlDatabase[req.params.id].longURL;
   res.redirect(link);
 });
-
-/* redirection for security
- * automatically redirects the user to login whenever they are not logged in
- * unless the websites are /login, /register/ or /urls
- */
-app.use((req, res, next) => {
-
-  const user = req.session.user;
-  const whiteList = ["/login", "/register","/urls?", "/register?", "/login?"];
-
-  if (user || whiteList.includes(req.url)) {
-    //allows user to continue if they are whitelisted or signed in
-    return next();
-  }
-
-  return res.redirect("/login");
-});
-
-app.get("/urls/new", (req, res) => {
-
-  const templateVars = {user : users[req.session.user]};//importing cookie information to the header
-  res.render("urls_new", templateVars);
-
-});
-
 app.get("/urls/:id", (req, res) => {
+  /* security purposes to check if
+   * the id exists
+   * the user is logged in
+   * and if the user has security permissions to edit the link
+   */
   if (!urlDatabase[req.params.id]) {
     res.status(404).send("link does not exist");
     return;
@@ -109,6 +89,36 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+/* redirection for security
+ * automatically redirects the user to login whenever they are not logged in
+ * unless the websites are /login, /register/ or /urls
+ */
+
+
+app.use((req, res, next) => {
+
+  const user = req.session.user;
+  const whiteList = ["/login", "/register","/urls?", "/register?", "/login?"];
+
+  if (user || whiteList.includes(req.url)) {
+    //allows user to continue if they are whitelisted or signed in
+    return next();
+  }
+
+  return res.redirect("/login");
+});
+
+app.get("/urls/new", (req, res) => {
+
+  const templateVars = {user : users[req.session.user]};//importing cookie information to the header
+  res.render("urls_new", templateVars);
+
+});
+
+/* this route creates a new link
+ * this user must be logged in by checking if they have a user cookie assigned to them
+ * then adds the new link
+ */
 app.post("/urls", (req, res) => {
   if (!req.session.user) {
     return res.sendStatus(401);
@@ -121,7 +131,9 @@ app.post("/urls", (req, res) => {
 
 app.delete("/urls/:id/delete", (req, res) => {
   const urlDelete = req.params.id;
-
+  /* requires the user to be logged in
+   * security purposes to prevent other users from deleting other people's links
+   */
   if (!req.session.user) {
     res.status(401).send("you are not logged in");
     return;
@@ -131,7 +143,7 @@ app.delete("/urls/:id/delete", (req, res) => {
     res.status(401).send("you do not own the link");
     return;
   }
-
+  
   delete urlDatabase[urlDelete];
   return res.redirect('/urls');
 });
@@ -139,30 +151,35 @@ app.delete("/urls/:id/delete", (req, res) => {
 app.put("/urls/:id/update", (req, res) => {
 
   const updatedURLID = req.params.id;
-  urlDatabase[updatedURLID].longURL = req.body.URL;//updates the id of the shortened link to the new link
+  urlDatabase[updatedURLID].longURL = req.body.URL;
+  //updates the id of the shortened link to the new link
   res.redirect("/urls");
 
 });
 
 app.get("/login", (req,res) => {
 
-  if (req.session.user) { //redirects the user if they are logged in already
+  if (req.session.user) {
+    //redirects the user if they are logged in already
     return res.redirect('/urls');
   }
 
-  const templateVars = {user : users[req.session.user]};//sends user_id cookie information to the header to display user email information
+  const templateVars = {user : users[req.session.user]};
+  //sends user_id cookie information to the header to display user email information
   res.render('urls_login', templateVars);
 
 });
 
 app.post("/login", (req, res) => {
   
-  if (!getUserByEmail(req.body.email)) {//checks if the email is in the database
+  if (!getUserByEmail(req.body.email)) {
+    //checks if the email is in the database
     res.status(403).send("user with email cannot be found");
     return;
   }
 
-  const userLogin = checkPassword(req.body.email, req.body.pass);//returns the user if the password matches the email else it will return false
+  const userLogin = checkPassword(req.body.email, req.body.pass)
+  ;//returns the user if the password matches the email else it will return false
   if (userLogin === false) {
     res.status(403).send("password does not match");
     return;
@@ -205,7 +222,7 @@ app.post("/register", (req, res) => {
   //cannot be duplicate email in the users dataset already
 
   const newUser = addUser(req.body.email, req.body.pass);
-  req.session.user = newUser;//assigns a cookie using their id
+  req.session.user = newUser;   //assigns a cookie using their id
   res.redirect("/urls");
   
 });
