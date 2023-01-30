@@ -47,7 +47,10 @@ app.get("/u/:id", (req, res) => {
   if (!req.session.visitorID) {
     req.session.visitorID = generateRandomString();
   }
-
+  /* checks if the user have visited this site to keep track of the unique visitors
+   * increases the total counter of times this shortened link was visited
+   * then adds a time stamp for the shortened url which is stored in the urlDatabase
+   */
   checkUniqueVisitor(req.params.id, req.session.visitorID);
   urlDatabase[req.params.id].timesVisited++;
   addTimeStamp(req.params.id, req.session.visitorID);
@@ -56,6 +59,10 @@ app.get("/u/:id", (req, res) => {
   res.redirect(link);
 });
 
+/* redirection for security
+ * automatically redirects the user to login whenever they are not logged in
+ * unless the websites are /login, /register/ or /urls
+ */
 app.use((req, res, next) => {
 
   const user = req.session.user;
